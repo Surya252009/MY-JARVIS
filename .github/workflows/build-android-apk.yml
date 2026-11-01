@@ -1,0 +1,43 @@
+name: Build MY JARVIS APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract Android project
+        run: |
+          unzip -q JARVIS-ANDROID-STARTER-REVISION-5-FIXED.zip -d android-project
+          test -f android-project/settings.gradle.kts
+          test -f android-project/app/build.gradle.kts
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: gradle -p android-project assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MY-JARVIS-APK
+          path: android-project/app/build/outputs/apk/debug/app-debug.apk
